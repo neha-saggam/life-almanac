@@ -75,28 +75,29 @@
 
   /* Ambient blurred color orbs, always slowly drifting for continuous life on the page */
   .ambient-orbs{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
-  .orb{ position:absolute; border-radius:50%; filter:blur(50px); opacity:0.16; }
-  .orb-a{ width:260px; height:260px; background:var(--rust); top:-60px; left:10%; animation:orbitA 34s ease-in-out infinite; }
-  .orb-b{ width:220px; height:220px; background:var(--teal); top:30%; right:-40px; animation:orbitB 40s ease-in-out infinite; }
-  .orb-c{ width:200px; height:200px; background:var(--violet); bottom:-40px; left:35%; animation:orbitC 46s ease-in-out infinite; }
-  [data-theme="dark"] .orb{ opacity:0.22; }
-  @keyframes orbitA{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(60px,50px); } }
-  @keyframes orbitB{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-50px,60px); } }
-  @keyframes orbitC{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(40px,-50px); } }
+  .orb{ position:absolute; border-radius:50%; filter:blur(60px); opacity:0.26; }
+  .orb-a{ width:420px; height:420px; background:var(--rust); top:-100px; left:2%; animation:orbitA 30s ease-in-out infinite; }
+  .orb-b{ width:360px; height:360px; background:var(--teal); top:25%; right:-100px; animation:orbitB 36s ease-in-out infinite; }
+  .orb-c{ width:340px; height:340px; background:var(--violet); bottom:-100px; left:28%; animation:orbitC 42s ease-in-out infinite; }
+  .orb-d{ width:300px; height:300px; background:var(--mustard); top:55%; left:60%; animation:orbitB 38s ease-in-out infinite reverse; }
+  [data-theme="dark"] .orb{ opacity:0.34; }
+  @keyframes orbitA{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(110px,90px) scale(1.15); } }
+  @keyframes orbitB{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(-100px,110px) scale(1.1); } }
+  @keyframes orbitC{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(90px,-100px) scale(1.15); } }
   @media (prefers-reduced-motion: reduce){ .orb{ animation:none; } }
 
   /* Floating personal doodles drifting behind the content */
   .doodles{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
-  .doodles svg{ position:absolute; opacity:0.07; stroke:var(--ink); fill:none; stroke-width:1.6; }
-  [data-theme="dark"] .doodles svg{ opacity:0.09; }
-  .doodle-1{ top:8%; left:4%; width:70px; animation:drift1 26s ease-in-out infinite; }
-  .doodle-2{ top:65%; left:88%; width:60px; animation:drift2 32s ease-in-out infinite; }
-  .doodle-3{ top:38%; left:92%; width:50px; animation:drift3 22s ease-in-out infinite; }
-  .doodle-4{ top:80%; left:6%; width:56px; animation:drift1 30s ease-in-out infinite reverse; }
-  .doodle-5{ top:14%; left:80%; width:44px; animation:drift3 24s ease-in-out infinite; }
-  @keyframes drift1{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(14px,-18px) rotate(6deg); } }
-  @keyframes drift2{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(-16px,14px) rotate(-8deg); } }
-  @keyframes drift3{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(10px,16px) rotate(5deg); } }
+  .doodles svg{ position:absolute; opacity:0.16; stroke:var(--ink); fill:none; stroke-width:1.6; }
+  [data-theme="dark"] .doodles svg{ opacity:0.2; }
+  .doodle-1{ top:8%; left:3%; width:130px; animation:drift1 22s ease-in-out infinite; }
+  .doodle-2{ top:62%; left:84%; width:115px; animation:drift2 27s ease-in-out infinite; }
+  .doodle-3{ top:36%; left:88%; width:100px; animation:drift3 19s ease-in-out infinite; }
+  .doodle-4{ top:78%; left:4%; width:110px; animation:drift1 25s ease-in-out infinite reverse; }
+  .doodle-5{ top:12%; left:76%; width:90px; animation:drift3 20s ease-in-out infinite; }
+  @keyframes drift1{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(30px,-36px) rotate(9deg); } }
+  @keyframes drift2{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(-34px,28px) rotate(-11deg); } }
+  @keyframes drift3{ 0%,100%{ transform:translate(0,0) rotate(0deg); } 50%{ transform:translate(22px,32px) rotate(8deg); } }
   @media (prefers-reduced-motion: reduce){ .doodles svg{ animation:none; } }
   @media (max-width:720px){ .doodles{ display:none; } }
 
@@ -312,6 +313,7 @@
   <div class="orb orb-a"></div>
   <div class="orb orb-b"></div>
   <div class="orb orb-c"></div>
+  <div class="orb orb-d"></div>
 </div>
 <div class="doodles" aria-hidden="true">
   <svg class="doodle-1" viewBox="0 0 60 60"><path d="M10 20h34l-3 24c-1 6-6 10-12 10H25c-6 0-11-4-12-10L10 20z"/><path d="M44 24c10 0 10 16 0 16"/><line x1="10" y1="20" x2="44" y2="20"/></svg>
