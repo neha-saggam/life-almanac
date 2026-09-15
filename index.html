@@ -170,7 +170,14 @@
   .route{ position:relative; padding:10px 0 6px 0; }
   .route-line{ position:absolute; left:0; right:0; top:50%; height:2px; background:var(--line); z-index:0; }
   .route-stops{ display:flex; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:22px 8px; }
-  .stop{ display:flex; flex-direction:column; align-items:center; text-align:center; width:110px; }
+  .stop{ display:flex; flex-direction:column; align-items:center; text-align:center; width:110px; text-decoration:none; color:inherit; }
+  .stop.has-essay{ cursor:pointer; }
+  .stop.has-essay .name{ position:relative; }
+  .stop.has-essay .name::after{ content:"✎"; color:var(--violet); font-size:11px; margin-left:3px; vertical-align:super; }
+  .stop.has-essay:hover .name{ color:var(--violet); }
+  .stop.has-essay:hover .dot{ background:var(--violet); box-shadow:0 0 0 1px var(--violet); }
+  .stop.has-essay .note{ transition:color .15s ease; }
+  .stop.has-essay:hover .note{ color:var(--violet); }
   .stop .dot{ width:13px; height:13px; border-radius:50%; background:var(--c-travel); border:3px solid var(--paper); box-shadow:0 0 0 1px var(--c-travel); margin-bottom:8px; }
   .stop .flag{ font-size:22px; margin-bottom:4px; }
   .stop .name{ font-family:'Fraunces', serif; font-size:15px; }
@@ -184,7 +191,7 @@
   .card a{ color:var(--violet); text-decoration:none; border-bottom:1px solid rgba(139,79,201,0.35); }
   .card a:hover{ border-bottom-color:var(--violet); }
 
-  .open-note; border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
+  .open-note{ border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
   .open-note strong{ color:var(--ink); }
 
   .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
@@ -304,13 +311,14 @@
     <div class="route">
       <div class="route-line"></div>
       <div class="route-stops">
-        <div class="stop"><span class="flag">🇯🇵</span><span class="dot"></span><span class="name">Japan</span><span class="note">temples, order</span></div>
+        <a class="stop has-essay" href="https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b" target="_blank" rel="noopener" title="Read the Medium essay"><span class="flag">🇯🇵</span><span class="dot"></span><span class="name">Japan</span><span class="note">temples, order</span></a>
         <div class="stop"><span class="flag">🇳🇵</span><span class="dot"></span><span class="name">Nepal</span><span class="note">mountains</span></div>
-        <div class="stop"><span class="flag">🇧🇹</span><span class="dot"></span><span class="name">Bhutan</span><span class="note">quiet, altitude</span></div>
+        <a class="stop has-essay" href="https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb" target="_blank" rel="noopener" title="Read the Medium essay"><span class="flag">🇧🇹</span><span class="dot"></span><span class="name">Bhutan</span><span class="note">quiet, altitude</span></a>
         <div class="stop"><span class="flag">🇱🇰</span><span class="dot"></span><span class="name">Sri Lanka</span><span class="note">coastline</span></div>
         <div class="stop"><span class="flag">🇻🇳</span><span class="dot"></span><span class="name">Vietnam</span><span class="note">street food</span></div>
       </div>
     </div>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:10px 0 0;">Stops marked <span style="color:var(--violet);">✎</span> have a Medium essay attached — click through to read it.</p>
     <div style="margin-top:32px;">
       <div class="tl-item">
         <h4>December birthday trip — Himachal Pradesh</h4>
