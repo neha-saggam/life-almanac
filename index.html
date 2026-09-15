@@ -81,7 +81,10 @@
   .stat-strip > div{
     padding:18px 20px;
     border-right:1px solid var(--line);
+    cursor:pointer;
+    transition:background .2s ease;
   }
+  .stat-strip > div:hover{ background:var(--paper-raised); }
   .stat-strip > div:last-child{ border-right:none; }
   .stat-strip .num{ font-family:'Fraunces', serif; font-size:28px; display:block; }
   .stat-strip > div:nth-child(1) .num{ color:var(--c-career); }
@@ -135,7 +138,13 @@
   .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:20px; }
   @media (max-width:680px){ .grid{ grid-template-columns:1fr; } }
 
-  .card{ background:var(--paper-raised); border:1px solid var(--line); padding:22px 24px; }
+  .card{ background:var(--paper-raised); border:1px solid var(--line); padding:22px 24px; transition:transform .18s ease, box-shadow .18s ease; }
+  .card:hover{ transform:translateY(-3px); box-shadow:0 8px 18px rgba(38,34,27,0.12); }
+  .chapter.active .card{ animation:cardIn .4s ease backwards; }
+  .chapter.active .card:nth-child(1){ animation-delay:.03s; }
+  .chapter.active .card:nth-child(2){ animation-delay:.1s; }
+  .chapter.active .card:nth-child(3){ animation-delay:.17s; }
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
   .card h3{ font-family:'Fraunces', serif; font-weight:500; font-size:19px; margin:0 0 10px; }
   .card p, .card li{ font-size:14.5px; color:var(--ink-soft); }
   .card ul{ margin:0; padding-left:18px; }
@@ -175,7 +184,7 @@
   .card a{ color:var(--violet); text-decoration:none; border-bottom:1px solid rgba(139,79,201,0.35); }
   .card a:hover{ border-bottom-color:var(--violet); }
 
-  .open-note{ border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
+  .open-note; border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
   .open-note strong{ color:var(--ink); }
 
   .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
@@ -206,10 +215,10 @@
   </div>
 
   <div class="stat-strip">
-    <div><span class="num">11 yrs</span><span class="label">building for the web</span></div>
-    <div><span class="num">2</span><span class="label">ventures being planned in parallel</span></div>
-    <div><span class="num">5</span><span class="label">countries — Japan to Sri Lanka</span></div>
-    <div><span class="num">88</span><span class="label">best current job-fit score</span></div>
+    <div data-goto="career"><span class="num">11 yrs</span><span class="label">building for the web</span></div>
+    <div data-goto="ventures"><span class="num">2</span><span class="label">ventures being planned in parallel</span></div>
+    <div data-goto="travel"><span class="num">5</span><span class="label">countries — Japan to Sri Lanka</span></div>
+    <div data-goto="career"><span class="num">88</span><span class="label">best current job-fit score</span></div>
   </div>
 
   <div class="wheelnav">
@@ -224,6 +233,10 @@
     <button class="tab-btn" data-tab="writing">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 20l4.5-1.2L19 9.3a1.5 1.5 0 0 0 0-2.1l-2.2-2.2a1.5 1.5 0 0 0-2.1 0L4.2 15.5 3 20z"/><path d="M13.5 6l3.5 3.5"/></svg>
       Writing
+    </button>
+    <button class="tab-btn" id="surprise-btn" style="margin-left:auto;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+      Shuffle
     </button>
   </div>
 
@@ -346,7 +359,7 @@
 </div>
 
 <script>
-  const buttons = document.querySelectorAll('.tab-btn');
+  const buttons = document.querySelectorAll('.tab-btn[data-tab]');
   const chapters = document.querySelectorAll('.chapter');
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -372,6 +385,44 @@
   }
   window.addEventListener('hashchange', openFromHash);
   if (window.location.hash) openFromHash();
+
+  // All chapter ids, including ones with no nav button (e.g. Ventures),
+  // so Shuffle and arrow keys can reach every chapter.
+  const allChapterIds = Array.from(chapters).map(c => c.id);
+
+  function activateChapter(id){
+    buttons.forEach(b => b.classList.remove('active'));
+    chapters.forEach(c => c.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    const matchingBtn = document.querySelector('.tab-btn[data-tab="' + id + '"]');
+    if (matchingBtn) matchingBtn.classList.add('active');
+  }
+
+  const surpriseBtn = document.getElementById('surprise-btn');
+  if (surpriseBtn) {
+    surpriseBtn.addEventListener('click', () => {
+      const current = document.querySelector('.chapter.active');
+      const currentId = current ? current.id : null;
+      const choices = allChapterIds.filter(id => id !== currentId);
+      const next = choices[Math.floor(Math.random() * choices.length)];
+      activateChapter(next);
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const current = document.querySelector('.chapter.active');
+    const currentIndex = current ? allChapterIds.indexOf(current.id) : 0;
+    const delta = e.key === 'ArrowRight' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + allChapterIds.length) % allChapterIds.length;
+    activateChapter(allChapterIds[nextIndex]);
+  });
+
+  // Clicking a stat jumps straight to its related chapter.
+  document.querySelectorAll('.stat-strip [data-goto]').forEach(stat => {
+    stat.addEventListener('click', () => activateChapter(stat.dataset.goto));
+  });
 </script>
 </body>
 </html>
