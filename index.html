@@ -210,7 +210,18 @@
   }
   @media (prefers-reduced-motion: reduce){ .chapter.active{ animation:none; } }
 
-  .chapter-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:26px; }
+  .chapter-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:26px; position:relative; }
+  .margin-note{
+    position:absolute; top:-14px; right:4px; max-width:170px;
+    background:var(--mustard); color:#26221B;
+    font-family:'Fraunces', serif; font-style:italic; font-size:12px; line-height:1.35;
+    padding:7px 10px; transform:rotate(-3deg);
+    box-shadow:2px 4px 8px rgba(38,34,27,0.2);
+  }
+  .margin-note:hover{ transform:rotate(0deg) scale(1.03); transition:transform .2s ease; }
+  @media (max-width:720px){
+    .margin-note{ position:static; display:inline-block; margin:8px 0 0; transform:rotate(-2deg); }
+  }
   .chapter-head h2{ font-family:'Fraunces', serif; font-weight:500; font-size:29px; margin:0; }
   #career .chapter-head h2{ color:var(--c-career); }
   #ventures .chapter-head h2{ color:var(--c-ventures); }
@@ -396,6 +407,7 @@
     <div class="chapter-head">
       <h2>Career</h2>
       <span class="tagline"><a href="https://www.linkedin.com/in/nehasaggam/" target="_blank" rel="noopener" style="color:inherit; border-bottom:1px dotted var(--ink-soft); text-decoration:none;">Lead Frontend Developer</a> · Technogise · Pune</span>
+      <div class="margin-note">still torn between Angular and React — don’t make me pick</div>
     </div>
     <div class="grid">
       <div class="card">
@@ -449,6 +461,7 @@
     <div class="chapter-head">
       <h2>Ventures</h2>
       <span class="tagline">Two ideas, both still on the side of a day job</span>
+      <div class="margin-note">still just a plan — ask me again in six months</div>
     </div>
     <div class="grid">
       <div class="card">
@@ -483,6 +496,7 @@
     <div class="chapter-head">
       <h2>Travel</h2>
       <span class="tagline">Five countries so far, café-hopping in between</span>
+      <div class="margin-note">already plotting where’s next</div>
     </div>
     <div id="travel-map"></div>
     <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
@@ -530,6 +544,7 @@
     <div class="chapter-head">
       <h2>Writing</h2>
       <span class="tagline">medium.com/@nehasaggam · 70 followers</span>
+      <div class="margin-note">half of these started as a 2am note-to-self</div>
     </div>
     <div class="card" style="margin-bottom:20px;">
       <p style="font-family:'Fraunces', serif; font-style:italic; font-size:17px; color:var(--ink);">A developer, a nature lover, and an imaginary traveller.</p>
