@@ -125,7 +125,8 @@
   .hero p.sub{ max-width:50ch; font-size:16.5px; color:var(--ink-soft); margin:0; }
 
   .hero-art{ display:flex; justify-content:center; }
-  .hero-art svg{ width:100%; max-width:220px; height:auto; }
+  .hero-art svg{ width:100%; max-width:340px; height:auto; filter:drop-shadow(0 10px 20px rgba(38,34,27,0.15)); }
+  @media (max-width:720px){ .hero-art svg{ max-width:220px; } }
   #steam path{ animation:rise 4.5s ease-in-out infinite; transform-origin:center bottom; }
   #steam path:nth-child(2){ animation-delay:.7s; }
   #steam path:nth-child(3){ animation-delay:1.4s; }
@@ -287,6 +288,17 @@
   .open-note{ border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
   .open-note strong{ color:var(--ink); }
 
+  .ticker-wrap{
+    background:var(--ink); color:var(--paper); overflow:hidden; white-space:nowrap;
+    margin:0 -26px 36px; padding:10px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .ticker-track{ display:inline-flex; animation:tickerScroll 26s linear infinite; }
+  .ticker-track span{ display:inline-flex; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.02em; padding:0 28px; }
+  .ticker-track span::after{ content:"\2726"; margin-left:28px; color:var(--rust); font-size:10px; }
+  @keyframes tickerScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  .ticker-wrap:hover .ticker-track{ animation-play-state:paused; }
+  @media (prefers-reduced-motion: reduce){ .ticker-track{ animation:none; } }
+
   .day-rhythm{ display:flex; border:1px solid var(--line); margin-bottom:20px; overflow:hidden; }
   .day-rhythm > div{ flex:1; padding:12px 10px; text-align:center; border-right:1px solid var(--line); }
   .day-rhythm > div:last-child{ border-right:none; }
@@ -339,6 +351,25 @@
         <path id="cup-handle" d="M125 68 C142 68 142 96 125 96" fill="none" stroke="#26221B" stroke-width="2.5"/>
         <line id="cup-rim" x1="35" y1="60" x2="125" y2="60" stroke="#26221B" stroke-width="2.5"/>
       </svg>
+    </div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-track">
+      <span>ELEVEN YEARS IN FRONTEND</span>
+      <span>TWO VENTURES STILL IN PLANNING</span>
+      <span>FIVE COUNTRIES, ONE PASSPORT</span>
+      <span>CHAI, NON-NEGOTIABLE</span>
+      <span>GYM AT SIX, EVERY MORNING</span>
+      <span>WRITES ON MEDIUM</span>
+      <span>ANGULAR BY TRADE, REACT AT HEART</span>
+      <span>ELEVEN YEARS IN FRONTEND</span>
+      <span>TWO VENTURES STILL IN PLANNING</span>
+      <span>FIVE COUNTRIES, ONE PASSPORT</span>
+      <span>CHAI, NON-NEGOTIABLE</span>
+      <span>GYM AT SIX, EVERY MORNING</span>
+      <span>WRITES ON MEDIUM</span>
+      <span>ANGULAR BY TRADE, REACT AT HEART</span>
     </div>
   </div>
 
