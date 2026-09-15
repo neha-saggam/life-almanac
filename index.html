@@ -506,6 +506,10 @@
         <h4>The standing habit — café-hopping</h4>
         <p>Not one trip but a running one: new cafés sought out wherever she is, chai the constant order.</p>
       </div>
+      <div class="tl-item">
+        <h4>Also across India</h4>
+        <p>Rann of Kutch (Gujarat), Mumbai, Delhi, Rishikesh, Haridwar, Sikkim, and Sethan — alongside Manali and Bir Billing above.</p>
+      </div>
     </div>
   </section>
 
@@ -669,12 +673,27 @@
         popupAnchor: [0, -12]
       });
     }
+    const indiaPlaces = [
+      { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+      { name: 'Delhi', lat: 28.7041, lng: 77.1025 },
+      { name: 'Rishikesh', lat: 30.0869, lng: 78.2676 },
+      { name: 'Haridwar', lat: 29.9457, lng: 78.1642 },
+      { name: 'Sikkim', lat: 27.3389, lng: 88.6065 },
+      { name: 'Rann of Kutch', lat: 23.8398, lng: 69.8597 },
+      { name: 'Manali', lat: 32.2432, lng: 77.1892 },
+      { name: 'Bir Billing', lat: 32.0480, lng: 76.7368 },
+      { name: 'Sethan', lat: 32.2856, lng: 77.1518 }
+    ];
     stops.forEach(s => {
       const hasEssay = !!s.essay;
       const label = hasEssay ? s.name + ' \u2014 <a href="' + s.essay + '" target="_blank" rel="noopener">read the essay \u270E</a>' : s.name;
       const marker = L.marker([s.lat, s.lng], { icon: makeIcon(hasEssay) }).addTo(map).bindPopup(label);
       const tooltipText = hasEssay ? s.name + ' \u270E' : s.name;
       marker.bindTooltip(tooltipText, { permanent: true, direction: 'top', offset: [0, -10], className: hasEssay ? 'stop-label essay-label' : 'stop-label' });
+    });
+    indiaPlaces.forEach(p => {
+      const marker = L.marker([p.lat, p.lng], { icon: makeIcon(false) }).addTo(map).bindPopup(p.name);
+      marker.bindTooltip(p.name, { permanent: true, direction: 'top', offset: [0, -10], className: 'stop-label' });
     });
   }
   function playChapterAnimations(id){
