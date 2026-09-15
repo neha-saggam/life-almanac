@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Neha Almanac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFE9D8;
+    --paper-raised:#F6F2E5;
+    --ink:#26221B;
+    --ink-soft:#5A5347;
+    --rust:#8C4A2F;
+    --moss:#586B4A;
+    --mustard:#B98A22;
+    --line:#C9BFA5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(38,34,27,0.06) 1px, transparent 0);
+    background-size:22px 22px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:980px; margin:0 auto; padding:52px 26px 90px; }
+
+  /* HERO */
+  .hero{
+    display:grid;
+    grid-template-columns:1.4fr 0.9fr;
+    gap:30px;
+    align-items:end;
+    padding-bottom:34px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:36px;
+  }
+  @media (max-width:720px){ .hero{ grid-template-columns:1fr; } .hero-art{ order:-1; } }
+  .hero-kicker{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft); letter-spacing:0.03em; margin-bottom:10px; }
+  .hero h1{
+    font-family:'Fraunces', serif; font-weight:500; font-style:italic;
+    font-size:clamp(40px, 6.4vw, 66px); line-height:0.98; margin:0 0 16px;
+  }
+  .hero p.sub{ max-width:50ch; font-size:16.5px; color:var(--ink-soft); margin:0; }
+
+  .hero-art{ display:flex; justify-content:center; }
+  .hero-art svg{ width:100%; max-width:220px; height:auto; }
+  #steam path{ animation:rise 4.5s ease-in-out infinite; transform-origin:center bottom; }
+  #steam path:nth-child(2){ animation-delay:.7s; }
+  #steam path:nth-child(3){ animation-delay:1.4s; }
+  @keyframes rise{
+    0%{ opacity:0; transform:translateY(4px) scaleY(0.9); }
+    35%{ opacity:.9; }
+    100%{ opacity:0; transform:translateY(-14px) scaleY(1.1); }
+  }
+
+  /* STAT STRIP */
+  .stat-strip{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:0;
+    margin-bottom:44px;
+    border:1px solid var(--line);
+  }
+  @media (max-width:680px){ .stat-strip{ grid-template-columns:repeat(2,1fr); } }
+  .stat-strip > div{
+    padding:18px 20px;
+    border-right:1px solid var(--line);
+  }
+  .stat-strip > div:last-child{ border-right:none; }
+  .stat-strip .num{ font-family:'Fraunces', serif; font-size:28px; display:block; color:var(--rust); }
+  .stat-strip .label{ font-size:12.5px; color:var(--ink-soft); }
+
+  /* WHEEL NAV */
+  .wheelnav{
+    display:flex;
+    gap:10px;
+    margin-bottom:40px;
+    flex-wrap:wrap;
+  }
+  .wheelnav button{
+    display:flex; align-items:center; gap:9px;
+    font-family:'IBM Plex Sans', sans-serif; font-size:14.5px;
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:24px;
+    padding:9px 18px 9px 12px; color:var(--ink-soft); cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .wheelnav button svg{ width:17px; height:17px; stroke:var(--ink-soft); transition:stroke .2s ease; }
+  .wheelnav button.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .wheelnav button.active svg{ stroke:var(--paper); }
+
+  .chapter{ display:none; }
+  .chapter.active{ display:block; animation:fade .35s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  .chapter-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:26px; }
+  .chapter-head h2{ font-family:'Fraunces', serif; font-weight:500; font-size:29px; margin:0; }
+  .chapter-head .tagline{ font-size:13.5px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:20px; }
+  @media (max-width:680px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{ background:var(--paper-raised); border:1px solid var(--line); padding:22px 24px; }
+  .card h3{ font-family:'Fraunces', serif; font-weight:500; font-size:19px; margin:0 0 10px; }
+  .card p, .card li{ font-size:14.5px; color:var(--ink-soft); }
+  .card ul{ margin:0; padding-left:18px; }
+  .card li{ margin-bottom:6px; }
+
+  .tag{ display:inline-block; font-size:12px; color:var(--moss); border:1px solid var(--moss); border-radius:20px; padding:2px 10px; margin:2px 6px 2px 0; }
+  .tag.gap{ color:var(--rust); border-color:var(--rust); }
+
+  /* fit score bars */
+  .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .bar-row .bar-label{ width:190px; font-size:13px; color:var(--ink-soft); flex-shrink:0; }
+  .bar-track{ flex:1; height:8px; background:var(--paper); border:1px solid var(--line); position:relative; }
+  .bar-fill{ height:100%; background:var(--rust); }
+  .bar-score{ width:32px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft); text-align:right; }
+
+  /* venture stage meter */
+  .stage-meter{ display:flex; gap:4px; margin:14px 0 6px; }
+  .stage-meter span{ flex:1; height:6px; background:var(--line); }
+  .stage-meter span.filled{ background:var(--mustard); }
+  .stage-caption{ font-size:12px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; }
+
+  /* travel route */
+  .route{ position:relative; padding:10px 0 6px 0; }
+  .route-line{ position:absolute; left:0; right:0; top:50%; height:2px; background:var(--line); z-index:0; }
+  .route-stops{ display:flex; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:22px 8px; }
+  .stop{ display:flex; flex-direction:column; align-items:center; text-align:center; width:110px; }
+  .stop .dot{ width:13px; height:13px; border-radius:50%; background:var(--rust); border:3px solid var(--paper); box-shadow:0 0 0 1px var(--rust); margin-bottom:8px; }
+  .stop .flag{ font-size:22px; margin-bottom:4px; }
+  .stop .name{ font-family:'Fraunces', serif; font-size:15px; }
+  .stop .note{ font-size:11.5px; color:var(--ink-soft); }
+
+  .tl-item{ position:relative; padding-left:22px; border-left:2px solid var(--line); margin-bottom:22px; }
+  .tl-item::before{ content:""; position:absolute; left:-7px; top:4px; width:9px; height:9px; border-radius:50%; background:var(--moss); }
+  .tl-item h4{ font-family:'Fraunces', serif; font-weight:500; font-size:16.5px; margin:0 0 4px; }
+  .tl-item p{ font-size:14.5px; color:var(--ink-soft); margin:0; }
+
+  .card a{ color:var(--rust); text-decoration:none; border-bottom:1px solid rgba(140,74,47,0.35); }
+  .card a:hover{ border-bottom-color:var(--rust); }
+
+  .open-note{ border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
+  .open-note strong{ color:var(--ink); }
+
+  .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div>
+      <div class="hero-kicker">field notes / vol. 1 — a life run in parallel</div>
+      <h1>The Neha<br>Almanac</h1>
+      <p class="sub">Eleven years deep in frontend work, and just as many threads pulling at once — a job search, two business ideas, a five-country travel streak, and chai as the one constant through all of it.</p>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="steam" stroke="#8C4A2F" stroke-width="2.5" stroke-linecap="round">
+          <path d="M60 55 C 55 45, 68 40, 62 28" />
+          <path d="M80 55 C 75 45, 88 40, 82 28" />
+          <path d="M100 55 C 95 45, 108 40, 102 28" />
+        </g>
+        <path d="M35 60 H125 L118 118 C116 128 106 135 95 135 H65 C54 135 44 128 42 118 L35 60 Z" fill="#F6F2E5" stroke="#26221B" stroke-width="2.5"/>
+        <path d="M125 68 C142 68 142 96 125 96" fill="none" stroke="#26221B" stroke-width="2.5"/>
+        <line x1="35" y1="60" x2="125" y2="60" stroke="#26221B" stroke-width="2.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div><span class="num">11 yrs</span><span class="label">building for the web</span></div>
+    <div><span class="num">2</span><span class="label">ventures being planned in parallel</span></div>
+    <div><span class="num">5</span><span class="label">countries — Japan to Sri Lanka</span></div>
+    <div><span class="num">88</span><span class="label">best current job-fit score</span></div>
+  </div>
+
+  <div class="wheelnav">
+    <button class="tab-btn active" data-tab="career">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Career
+    </button>
+    <button class="tab-btn" data-tab="ventures">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z"/><path d="M9 13v3a3 3 0 0 0 6 0v-3"/></svg>
+      Ventures
+    </button>
+    <button class="tab-btn" data-tab="travel">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-6 2 2-6 6-2z"/></svg>
+      Travel
+    </button>
+    <button class="tab-btn" data-tab="daily">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 9h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9z"/><path d="M17 10c3 0 4 2 4 4s-1 3-3 3"/><path d="M8 4c0 1.5-1.5 1.5-1.5 3M12 4c0 1.5-1.5 1.5-1.5 3"/></svg>
+      Everyday
+    </button>
+    <button class="tab-btn" data-tab="writing">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 20l4.5-1.2L19 9.3a1.5 1.5 0 0 0 0-2.1l-2.2-2.2a1.5 1.5 0 0 0-2.1 0L4.2 15.5 3 20z"/><path d="M13.5 6l3.5 3.5"/></svg>
+      Writing
+    </button>
+  </div>
+
+  <!-- CAREER -->
+  <section class="chapter active" id="career">
+    <div class="chapter-head">
+      <h2>Career</h2>
+      <span class="tagline">Lead Frontend Developer · Technogise · Pune</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Where the fit scores land</h3>
+        <div class="bar-row"><span class="bar-label">Senior React Developer</span><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div><span class="bar-score">88</span></div>
+        <div class="bar-row"><span class="bar-label">Full-Stack Lead (React+Node)</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-score">80</span></div>
+        <div class="bar-row"><span class="bar-label">Framework-agnostic Lead FE</span><div class="bar-track"><div class="bar-fill" style="width:78%"></div></div><span class="bar-score">78</span></div>
+        <div class="bar-row"><span class="bar-label">React/Next.js Lead</span><div class="bar-track"><div class="bar-fill" style="width:62%"></div></div><span class="bar-score">62</span></div>
+        <p style="margin-top:12px; font-size:13px;">The last one climbs the moment a visible Next.js project exists.</p>
+      </div>
+      <div class="card">
+        <h3>The search, honestly</h3>
+        <ul>
+          <li>Recalibrated toward React / Next.js-first roles</li>
+          <li>Two live Optum Pune roles shortlisted as strong fits</li>
+          <li>Kiro / MCP integration work is a rare, genuine differentiator</li>
+        </ul>
+        <div style="margin-top:12px;">
+          <span class="tag">Angular v17–21</span>
+          <span class="tag">Node.js</span>
+          <span class="tag gap">Gap: Next.js</span>
+          <span class="tag gap">Gap: GraphQL</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VENTURES -->
+  <section class="chapter" id="ventures">
+    <div class="chapter-head">
+      <h2>Ventures</h2>
+      <span class="tagline">Two ideas, both still on the side of a day job</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>The café</h3>
+        <p>A side-investment café in Pune, bounded tightly: under ₹10L capital, a six-month risk window, ~10 hrs/week. Cloud kitchen or kiosk fits those limits best — though most cafés take 8–18 months to break even, longer than the risk window allows for.</p>
+        <div class="stage-meter"><span class="filled"></span><span class="filled"></span><span></span><span></span></div>
+        <span class="stage-caption">idea → modeled → deciding → launched</span>
+      </div>
+      <div class="card">
+        <h3>The decor business</h3>
+        <p>A style-categorized home decor line with her sister, an interior designer — decor grouped by look (Warm Minimal, Bohemian first) instead of product type, sourced through a vendor her sister already trusts, kept renter-friendly and movable.</p>
+        <div class="stage-meter"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span></div>
+        <span class="stage-caption">idea → modeled → deciding → launched</span>
+      </div>
+    </div>
+    <div class="open-note">Neither has launched. Both are being planned properly before a rupee goes in — that discipline is itself a pattern worth noticing.</div>
+  </section>
+
+  <!-- TRAVEL -->
+  <section class="chapter" id="travel">
+    <div class="chapter-head">
+      <h2>Travel</h2>
+      <span class="tagline">Five countries so far, café-hopping in between</span>
+    </div>
+    <div class="route">
+      <div class="route-line"></div>
+      <div class="route-stops">
+        <div class="stop"><span class="flag">🇯🇵</span><span class="dot"></span><span class="name">Japan</span><span class="note">temples, order</span></div>
+        <div class="stop"><span class="flag">🇳🇵</span><span class="dot"></span><span class="name">Nepal</span><span class="note">mountains</span></div>
+        <div class="stop"><span class="flag">🇧🇹</span><span class="dot"></span><span class="name">Bhutan</span><span class="note">quiet, altitude</span></div>
+        <div class="stop"><span class="flag">🇱🇰</span><span class="dot"></span><span class="name">Sri Lanka</span><span class="note">coastline</span></div>
+        <div class="stop"><span class="flag">🇻🇳</span><span class="dot"></span><span class="name">Vietnam</span><span class="note">street food</span></div>
+      </div>
+    </div>
+    <div style="margin-top:32px;">
+      <div class="tl-item">
+        <h4>December birthday trip — Himachal Pradesh</h4>
+        <p>Manali, Bir Billing, and Dharamshala with friends. A trip built around a birthday rather than a destination.</p>
+      </div>
+      <div class="tl-item">
+        <h4>The standing habit — café-hopping</h4>
+        <p>Not one trip but a running one: new cafés sought out wherever she is, chai the constant order.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAILY -->
+  <section class="chapter" id="daily">
+    <div class="chapter-head">
+      <h2>Everyday life</h2>
+      <span class="tagline">What fills the space around the work</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Chai, first and always</h3>
+        <p>A confirmed chai lover — the thread running through the café idea, the café-hopping habit, and most ordinary afternoons.</p>
+      </div>
+      <div class="card">
+        <h3>Four morning gym sessions a week</h3>
+        <p>A standing morning routine alongside a full-time lead role and two ventures in planning — the kind of consistency that doesn't show up on a résumé but holds the rest of it up.</p>
+      </div>
+      <div class="card">
+        <h3>Entrepreneurship, as a pattern</h3>
+        <p>Not one business idea but a recurring pull toward building something of her own — a café, a decor line — running alongside a demanding lead role rather than instead of it.</p>
+      </div>
+    </div>
+    <div class="open-note"><strong>Not filled in yet:</strong> skincare was on the original list, but nothing's come up on it yet. Share a routine or a favourite product and that chapter gets built in too.</div>
+  </section>
+
+  <!-- WRITING -->
+  <section class="chapter" id="writing">
+    <div class="chapter-head">
+      <h2>Writing</h2>
+      <span class="tagline">medium.com/@nehasaggam · 70 followers</span>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <p style="font-family:'Fraunces', serif; font-style:italic; font-size:17px; color:var(--ink);">A developer, a nature lover, and an imaginary traveller.</p>
+      <p style="margin:6px 0 0;">Her own bio line — and a fair summary of the two threads that run through everything she's published: the trips she's taken, and the engineer's habit of writing things down so the next person doesn't have to relearn them.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Travel essays</h3>
+        <ul>
+          <li><a href="https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb" target="_blank" rel="noopener">Bhutan</a> — pinned</li>
+          <li><a href="https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b" target="_blank" rel="noopener">Reflecting on My Japan Journey</a></li>
+          <li><a href="https://medium.com/@nehasaggam/sri-lanka-plan-your-own-travel-4f8141efcc5" target="_blank" rel="noopener">Sri Lanka: Plan Your Own Travel</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Engineering notes</h3>
+        <ul>
+          <li><a href="https://medium.com/@nehasaggam/what-ai-did-to-us-are-we-getting-more-done-or-just-doing-more-c6540d836d3a" target="_blank" rel="noopener">AI: Are We Getting More Done, or Just Doing More?</a></li>
+          <li><a href="https://medium.com/technogise/unit-testing-what-to-mock-and-what-not-to-2b70015bb285" target="_blank" rel="noopener">Unit Testing: What to Mock and What Not To</a></li>
+          <li><a href="https://medium.com/technogise/rest-essentials-9379abebc19f" target="_blank" rel="noopener">REST Essentials</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="open-note">The same split shows up here as everywhere else on this page — travel writing sits right next to Git tutorials and reflections on AI at work, written across seven years without ever picking one lane.</div>
+  </section>
+
+  <div class="full-note">// built from what's come up across our conversations — updates as more does.</div>
+
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.tab-btn');
+  const chapters = document.querySelectorAll('.chapter');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      chapters.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
