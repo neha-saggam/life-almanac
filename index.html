@@ -304,6 +304,12 @@
   .leaflet-popup-content{ font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; margin:10px 12px; }
   .leaflet-popup-content a{ color:var(--violet); }
   .leaflet-popup-tip{ background:var(--paper-raised); }
+  .stop-label{
+    background:var(--paper-raised) !important; color:var(--ink) !important; border:1px solid var(--line) !important;
+    font-family:'IBM Plex Sans', sans-serif; font-size:11.5px; padding:2px 8px !important; box-shadow:none !important;
+  }
+  .stop-label.essay-label{ color:var(--violet) !important; border-color:var(--violet) !important; font-weight:600; }
+  .stop-label::before{ display:none !important; }
   .work-history{ margin-top:8px; }
   .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
 </style>
@@ -467,7 +473,10 @@
       <span class="tagline">Five countries so far, café-hopping in between</span>
     </div>
     <div id="travel-map"></div>
-    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">Markers with a <span style="color:var(--violet);">✎</span> link straight to the Medium essay about that trip.</p>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:50%; background:var(--violet); display:inline-block;"></span> has a Medium essay — click to read</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:50%; background:var(--c-travel); display:inline-block;"></span> no essay yet</span>
+    </p>
     <div style="margin-top:32px;">
       <div class="tl-item">
         <h4>December birthday trip — Himachal Pradesh</h4>
@@ -629,9 +638,23 @@
       { name: 'Sri Lanka', lat: 6.9271, lng: 79.8612 },
       { name: 'Vietnam', lat: 21.0278, lng: 105.8342 }
     ];
+    function makeIcon(hasEssay){
+      const color = hasEssay ? '#8B4FC9' : '#D2601E';
+      const badge = hasEssay ? '<div style="position:absolute; top:-9px; right:-9px; width:16px; height:16px; border-radius:50%; background:#8B4FC9; border:2px solid #FFF9EC; display:flex; align-items:center; justify-content:center; font-size:9px; color:#FFF9EC;">\u270E</div>' : '';
+      return L.divIcon({
+        className: '',
+        html: '<div style="position:relative;"><div style="width:16px; height:16px; border-radius:50%; background:' + color + '; border:3px solid #FFF9EC; box-shadow:0 0 0 1px ' + color + ';"></div>' + badge + '</div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        popupAnchor: [0, -12]
+      });
+    }
     stops.forEach(s => {
-      const label = s.essay ? s.name + ' — <a href="' + s.essay + '" target="_blank" rel="noopener">read the essay ✎</a>' : s.name;
-      L.marker([s.lat, s.lng]).addTo(map).bindPopup(label);
+      const hasEssay = !!s.essay;
+      const label = hasEssay ? s.name + ' \u2014 <a href="' + s.essay + '" target="_blank" rel="noopener">read the essay \u270E</a>' : s.name;
+      const marker = L.marker([s.lat, s.lng], { icon: makeIcon(hasEssay) }).addTo(map).bindPopup(label);
+      const tooltipText = hasEssay ? s.name + ' \u270E' : s.name;
+      marker.bindTooltip(tooltipText, { permanent: true, direction: 'top', offset: [0, -10], className: hasEssay ? 'stop-label essay-label' : 'stop-label' });
     });
   }
   function playChapterAnimations(id){
