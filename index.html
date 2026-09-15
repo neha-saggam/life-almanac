@@ -125,7 +125,9 @@
   @media (prefers-reduced-motion: reduce){ .hero h1{ animation:none; -webkit-background-clip:initial; background-clip:initial; color:var(--ink); } }
   .hero p.sub{ max-width:50ch; font-size:16.5px; color:var(--ink-soft); margin:0; }
 
-  .hero-art{ display:flex; justify-content:center; }
+  .hero-art{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .cup-caption{ margin-top:8px; font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft); text-align:center; opacity:0; transition:opacity .6s ease; }
+  .cup-caption.shown{ opacity:1; }
   .hero-art svg{ width:100%; max-width:340px; height:auto; filter:drop-shadow(0 10px 20px rgba(38,34,27,0.15)); }
   @media (max-width:720px){ .hero-art svg{ max-width:220px; } }
   #steam path{ animation:rise 4.5s ease-in-out infinite; transform-origin:center bottom; }
@@ -348,6 +350,7 @@
         <path id="cup-handle" d="M125 68 C142 68 142 96 125 96" fill="none" stroke="#26221B" stroke-width="2.5"/>
         <line id="cup-rim" x1="35" y1="60" x2="125" y2="60" stroke="#26221B" stroke-width="2.5"/>
       </svg>
+      <div class="cup-caption" id="cup-caption"></div>
     </div>
   </div>
 
@@ -790,9 +793,33 @@
     const rim = document.getElementById('cup-rim');
     const liquid = document.getElementById('cup-liquid');
     const steamGroup = document.getElementById('steam');
+    const caption = document.getElementById('cup-caption');
     if (!outline || !handle || !rim || !liquid || !steamGroup) return;
 
-    if (reduced) { steamGroup.style.opacity = '1'; return; }
+    // How full the cup is right now, based on the visitor's local clock:
+    // near-empty just after 6am, topped up by late evening.
+    const now = new Date();
+    const hourDecimal = now.getHours() + now.getMinutes() / 60;
+    let fraction = (hourDecimal - 6) / 17; // 6am -> 11pm
+    fraction = Math.max(0.08, Math.min(1, fraction));
+    const opacityTarget = (0.3 + fraction * 0.35).toFixed(2);
+
+    let phrase;
+    if (fraction < 0.2) phrase = 'fresh cup \u2014 the day\'s just getting started';
+    else if (fraction < 0.5) phrase = 'a few sips in';
+    else if (fraction < 0.8) phrase = 'well into the day\'s chai';
+    else phrase = 'topped up, evening chai o\'clock';
+    if (caption) { caption.textContent = phrase; }
+
+    if (reduced) {
+      steamGroup.style.opacity = '1';
+      liquid.style.transformBox = 'fill-box';
+      liquid.style.transformOrigin = 'bottom';
+      liquid.style.transform = 'scaleY(' + fraction + ')';
+      liquid.style.opacity = opacityTarget;
+      if (caption) caption.classList.add('shown');
+      return;
+    }
 
     function prepDraw(el, delayMs, durationMs){
       const len = (el.getTotalLength ? el.getTotalLength() : 120) + 2;
@@ -811,13 +838,15 @@
     liquid.style.transform = 'scaleY(0)';
     liquid.style.transition = 'transform 650ms cubic-bezier(.34,1.1,.64,1) 1350ms, opacity 350ms ease 1350ms';
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      liquid.style.transform = 'scaleY(1)';
-      liquid.style.opacity = '0.55';
+      liquid.style.transform = 'scaleY(' + fraction + ')';
+      liquid.style.opacity = opacityTarget;
     }));
 
     steamGroup.style.opacity = '0';
     steamGroup.style.transition = 'opacity 500ms ease 1950ms';
     requestAnimationFrame(() => requestAnimationFrame(() => { steamGroup.style.opacity = '1'; }));
+
+    if (caption) setTimeout(() => caption.classList.add('shown'), 2050);
   })();
 
   // Typewriter for the hero kicker line.
