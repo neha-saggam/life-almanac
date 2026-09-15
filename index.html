@@ -18,6 +18,7 @@
     }
   })();
 </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -240,6 +241,15 @@
   .open-note{ border:1px dashed var(--line); padding:18px 20px; font-size:14px; color:var(--ink-soft); margin-top:22px; }
   .open-note strong{ color:var(--ink); }
 
+  #travel-map{
+    height:320px; width:100%; border:1px solid var(--line); margin-bottom:18px;
+    filter:sepia(8%) saturate(85%);
+  }
+  .leaflet-popup-content-wrapper{ background:var(--paper-raised); color:var(--ink); border-radius:2px; }
+  .leaflet-popup-content{ font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; margin:10px 12px; }
+  .leaflet-popup-content a{ color:var(--violet); }
+  .leaflet-popup-tip{ background:var(--paper-raised); }
+  .work-history{ margin-top:8px; }
   .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
 </style>
 </head>
@@ -311,6 +321,24 @@
         <div class="bar-row"><span class="bar-label">React/Next.js Lead</span><div class="bar-track"><div class="bar-fill" style="width:62%"></div></div><span class="bar-score">62</span></div>
         <p style="margin-top:12px; font-size:13px;">The last one climbs the moment a visible Next.js project exists.</p>
       </div>
+      <div class="card">
+        <h3>Where the 11 years went</h3>
+        <div class="work-history">
+          <div class="tl-item">
+            <h4>Technogise — Lead Frontend Developer</h4>
+            <p>~2021 – present. Angular, Signals, NgRx, embedded at client sites out of Pune.</p>
+          </div>
+          <div class="tl-item">
+            <h4>Hashmap</h4>
+            <p>~2018 – 2021 (estimated).</p>
+          </div>
+          <div class="tl-item">
+            <h4>GS Labs</h4>
+            <p>~2015 – 2018 (estimated), first role out of the gate.</p>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Hashmap and GS Labs years are rough estimates against ~11 years total — happy to correct with exact dates.</p>
+      </div>
     </div>
   </section>
 
@@ -343,17 +371,8 @@
       <h2>Travel</h2>
       <span class="tagline">Five countries so far, café-hopping in between</span>
     </div>
-    <div class="route">
-      <div class="route-line"></div>
-      <div class="route-stops">
-        <a class="stop has-essay" href="https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b" target="_blank" rel="noopener" title="Read the Medium essay"><span class="flag">🇯🇵</span><span class="dot"></span><span class="name">Japan</span><span class="note">temples, order</span></a>
-        <div class="stop"><span class="flag">🇳🇵</span><span class="dot"></span><span class="name">Nepal</span><span class="note">mountains</span></div>
-        <a class="stop has-essay" href="https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb" target="_blank" rel="noopener" title="Read the Medium essay"><span class="flag">🇧🇹</span><span class="dot"></span><span class="name">Bhutan</span><span class="note">quiet, altitude</span></a>
-        <div class="stop"><span class="flag">🇱🇰</span><span class="dot"></span><span class="name">Sri Lanka</span><span class="note">coastline</span></div>
-        <div class="stop"><span class="flag">🇻🇳</span><span class="dot"></span><span class="name">Vietnam</span><span class="note">street food</span></div>
-      </div>
-    </div>
-    <p style="font-size:12.5px; color:var(--ink-soft); margin:10px 0 0;">Stops marked <span style="color:var(--violet);">✎</span> have a Medium essay attached — click through to read it.</p>
+    <div id="travel-map"></div>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">Markers with a <span style="color:var(--violet);">✎</span> link straight to the Medium essay about that trip.</p>
     <div style="margin-top:32px;">
       <div class="tl-item">
         <h4>December birthday trip — Himachal Pradesh</h4>
@@ -401,6 +420,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
   const buttons = document.querySelectorAll('.tab-btn[data-tab]');
   const chapters = document.querySelectorAll('.chapter');
@@ -476,19 +496,34 @@
       requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = target; }));
     });
   }
-  // Draw in the travel route line and reveal stops in sequence whenever that chapter opens.
-  function playTravelRoute(){
-    const line = document.querySelector('#travel .route-line');
-    const stops = document.querySelectorAll('#travel .stop');
-    if (line) { line.classList.remove('drawn'); requestAnimationFrame(() => requestAnimationFrame(() => line.classList.add('drawn'))); }
-    stops.forEach((stop, i) => {
-      stop.classList.remove('revealed');
-      setTimeout(() => stop.classList.add('revealed'), 150 + i * 120);
+  // Initialize the travel map once, the first time that chapter is opened.
+  let _travelMapInitialized = false;
+  function initTravelMap(){
+    if (_travelMapInitialized) return;
+    const mapEl = document.getElementById('travel-map');
+    if (!mapEl || typeof L === 'undefined') return;
+    _travelMapInitialized = true;
+    const map = L.map('travel-map', { scrollWheelZoom: false }).setView([20, 90], 3);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 10
+    }).addTo(map);
+    setTimeout(() => map.invalidateSize(), 100);
+    const stops = [
+      { name: 'Japan', lat: 35.6762, lng: 139.6503, essay: 'https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b' },
+      { name: 'Nepal', lat: 27.7172, lng: 85.3240 },
+      { name: 'Bhutan', lat: 27.4728, lng: 89.6390, essay: 'https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb' },
+      { name: 'Sri Lanka', lat: 6.9271, lng: 79.8612 },
+      { name: 'Vietnam', lat: 21.0278, lng: 105.8342 }
+    ];
+    stops.forEach(s => {
+      const label = s.essay ? s.name + ' — <a href="' + s.essay + '" target="_blank" rel="noopener">read the essay ✎</a>' : s.name;
+      L.marker([s.lat, s.lng]).addTo(map).bindPopup(label);
     });
   }
   function playChapterAnimations(id){
     if (id === 'career') playCareerBars();
-    if (id === 'travel') playTravelRoute();
+    if (id === 'travel') { initTravelMap(); setTimeout(() => { const m = document.getElementById('travel-map'); if (m && m._leaflet_id) { /* trigger resize if needed */ } }, 50); }
   }
   // Hook the animation triggers into every path that can activate a chapter.
   buttons.forEach(btn => btn.addEventListener('click', () => playChapterAnimations(btn.dataset.tab)));
