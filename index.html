@@ -73,6 +73,18 @@
   }
   .wrap{ max-width:980px; margin:0 auto; padding:52px 26px 90px; position:relative; z-index:1; }
 
+  /* Ambient blurred color orbs, always slowly drifting for continuous life on the page */
+  .ambient-orbs{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+  .orb{ position:absolute; border-radius:50%; filter:blur(50px); opacity:0.16; }
+  .orb-a{ width:260px; height:260px; background:var(--rust); top:-60px; left:10%; animation:orbitA 34s ease-in-out infinite; }
+  .orb-b{ width:220px; height:220px; background:var(--teal); top:30%; right:-40px; animation:orbitB 40s ease-in-out infinite; }
+  .orb-c{ width:200px; height:200px; background:var(--violet); bottom:-40px; left:35%; animation:orbitC 46s ease-in-out infinite; }
+  [data-theme="dark"] .orb{ opacity:0.22; }
+  @keyframes orbitA{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(60px,50px); } }
+  @keyframes orbitB{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-50px,60px); } }
+  @keyframes orbitC{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(40px,-50px); } }
+  @media (prefers-reduced-motion: reduce){ .orb{ animation:none; } }
+
   /* Floating personal doodles drifting behind the content */
   .doodles{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
   .doodles svg{ position:absolute; opacity:0.07; stroke:var(--ink); fill:none; stroke-width:1.6; }
@@ -158,7 +170,14 @@
     gap:10px;
     margin-bottom:40px;
     flex-wrap:wrap;
+    position:relative;
   }
+  .nav-indicator{
+    position:absolute; top:0; height:100%; border-radius:24px; background:var(--ink);
+    transition:left .35s cubic-bezier(.22,1,.36,1), width .35s cubic-bezier(.22,1,.36,1);
+    z-index:0; pointer-events:none;
+  }
+  .wheelnav button{ position:relative; z-index:1; }
   .wheelnav button{
     display:flex; align-items:center; gap:9px;
     font-family:'IBM Plex Sans', sans-serif; font-size:14.5px;
@@ -167,8 +186,12 @@
     transition:border-color .2s ease, color .2s ease, background .2s ease;
   }
   .wheelnav button svg{ width:17px; height:17px; stroke:var(--ink-soft); transition:stroke .2s ease; }
-  .wheelnav button.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .wheelnav button.active{ background:transparent; color:var(--paper); border-color:var(--ink); }
   .wheelnav button.active svg{ stroke:var(--paper); }
+  #surprise-btn svg{ transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
+  #surprise-btn.spin svg{ transform:rotate(360deg); }
+  #theme-toggle svg{ transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  #theme-toggle.spun svg{ transform:rotate(180deg); }
   .wheelnav button[data-tab="career"]:hover{ border-color:var(--c-career); color:var(--c-career); }
   .wheelnav button[data-tab="ventures"]:hover{ border-color:var(--c-ventures); color:var(--c-ventures); }
   .wheelnav button[data-tab="travel"]:hover{ border-color:var(--c-travel); color:var(--c-travel); }
@@ -215,6 +238,10 @@
 
   .tag{ display:inline-block; font-size:12px; color:var(--teal); border:1px solid var(--teal); background:rgba(27,140,140,0.08); border-radius:20px; padding:2px 10px; margin:2px 6px 2px 0; }
   .tag.gap{ color:var(--coral); border-color:var(--coral); background:rgba(224,85,63,0.08); }
+  .tag{ display:inline-block; transition:transform .18s ease; }
+  .tag:hover{ animation:wiggle .35s ease; }
+  @keyframes wiggle{ 0%,100%{ transform:rotate(0deg) scale(1); } 30%{ transform:rotate(-4deg) scale(1.06); } 60%{ transform:rotate(3deg) scale(1.06); } }
+  @media (prefers-reduced-motion: reduce){ .tag:hover{ animation:none; } }
 
   /* fit score bars */
   .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -280,6 +307,11 @@
 </style>
 </head>
 <body>
+<div class="ambient-orbs" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+</div>
 <div class="doodles" aria-hidden="true">
   <svg class="doodle-1" viewBox="0 0 60 60"><path d="M10 20h34l-3 24c-1 6-6 10-12 10H25c-6 0-11-4-12-10L10 20z"/><path d="M44 24c10 0 10 16 0 16"/><line x1="10" y1="20" x2="44" y2="20"/></svg>
   <svg class="doodle-2" viewBox="0 0 60 60"><path d="M8 30l14-4 8-18 4 2-5 17 12-3 8-8 3 2-6 9 8 3-1 3-10-1-9 9-4-1 6-9-12 3-6 12-4-1 4-13z"/></svg>
@@ -325,6 +357,7 @@
   </div>
 
   <div class="wheelnav" role="tablist" aria-label="Life almanac sections">
+    <div class="nav-indicator" id="nav-indicator"></div>
     <button class="tab-btn active" data-tab="career" role="tab" aria-selected="true" aria-controls="career" id="tab-career">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
       Career
@@ -483,6 +516,15 @@
 <script>
   const buttons = document.querySelectorAll('.tab-btn[data-tab]');
   const chapters = document.querySelectorAll('.chapter');
+  const navIndicator = document.getElementById('nav-indicator');
+  function moveIndicatorTo(btn){
+    if (!navIndicator || !btn) return;
+    const nav = btn.parentElement;
+    const navRect = nav.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    navIndicator.style.left = (btnRect.left - navRect.left) + 'px';
+    navIndicator.style.width = btnRect.width + 'px';
+  }
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       buttons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
@@ -490,7 +532,16 @@
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       document.getElementById(btn.dataset.tab).classList.add('active');
+      moveIndicatorTo(btn);
     });
+  });
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.tab-btn.active[data-tab]');
+    if (active) moveIndicatorTo(active);
+  });
+  requestAnimationFrame(() => {
+    const active = document.querySelector('.tab-btn.active[data-tab]');
+    if (active) moveIndicatorTo(active);
   });
 
   // Allow a direct link (e.g. this page's URL + #ventures) to open a chapter
@@ -519,7 +570,7 @@
     const target = document.getElementById(id);
     if (target) target.classList.add('active');
     const matchingBtn = document.querySelector('.tab-btn[data-tab="' + id + '"]');
-    if (matchingBtn) { matchingBtn.classList.add('active'); matchingBtn.setAttribute('aria-selected', 'true'); }
+    if (matchingBtn) { matchingBtn.classList.add('active'); matchingBtn.setAttribute('aria-selected', 'true'); moveIndicatorTo(matchingBtn); }
   }
 
   const surpriseBtn = document.getElementById('surprise-btn');
@@ -629,6 +680,40 @@
     });
     heroArt.addEventListener('mouseleave', () => {
       heroSvg.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  }
+
+  // Count the stat numbers up from 0 on load, instead of just appearing.
+  document.querySelectorAll('.stat-strip .num').forEach(el => {
+    const raw = el.textContent.trim();
+    const match = raw.match(/^(\d+)(.*)$/);
+    if (!match) return;
+    const target = parseInt(match[1], 10);
+    const suffix = match[2];
+    const duration = 900;
+    const start = performance.now();
+    el.textContent = '0' + suffix;
+    function tick(now){
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    if (prefersReducedMotion) { el.textContent = raw; } else { requestAnimationFrame(tick); }
+  });
+
+  // A little spin on the Shuffle and theme-toggle icons for tactile feedback.
+  if (surpriseBtn) {
+    surpriseBtn.addEventListener('click', () => {
+      surpriseBtn.classList.add('spin');
+      setTimeout(() => surpriseBtn.classList.remove('spin'), 500);
+    });
+  }
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      themeToggle.classList.add('spun');
+      setTimeout(() => themeToggle.classList.remove('spun'), 400);
     });
   }
 </script>
