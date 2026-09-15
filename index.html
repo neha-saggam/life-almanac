@@ -334,10 +334,10 @@
           <path d="M80 55 C 75 45, 88 40, 82 28" />
           <path d="M100 55 C 95 45, 108 40, 102 28" />
         </g>
-        <path d="M35 60 H125 L118 118 C116 128 106 135 95 135 H65 C54 135 44 128 42 118 L35 60 Z" fill="#FFF9EC" stroke="#26221B" stroke-width="2.5"/>
-        <path d="M42 118 L118 118 C116 128 106 135 95 135 H65 C54 135 44 128 42 118 Z" fill="#E0A716" opacity="0.55"/>
-        <path d="M125 68 C142 68 142 96 125 96" fill="none" stroke="#26221B" stroke-width="2.5"/>
-        <line x1="35" y1="60" x2="125" y2="60" stroke="#26221B" stroke-width="2.5"/>
+        <path id="cup-outline" d="M35 60 H125 L118 118 C116 128 106 135 95 135 H65 C54 135 44 128 42 118 L35 60 Z" fill="#FFF9EC" stroke="#26221B" stroke-width="2.5"/>
+        <path id="cup-liquid" d="M42 118 L118 118 C116 128 106 135 95 135 H65 C54 135 44 128 42 118 Z" fill="#E0A716" opacity="0.55"/>
+        <path id="cup-handle" d="M125 68 C142 68 142 96 125 96" fill="none" stroke="#26221B" stroke-width="2.5"/>
+        <line id="cup-rim" x1="35" y1="60" x2="125" y2="60" stroke="#26221B" stroke-width="2.5"/>
       </svg>
     </div>
   </div>
@@ -716,6 +716,62 @@
       setTimeout(() => themeToggle.classList.remove('spun'), 400);
     });
   }
+
+  // Signature hero animation: the cup sketches itself in, then the chai pours, then the steam rises.
+  (function heroDrawIn(){
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const outline = document.getElementById('cup-outline');
+    const handle = document.getElementById('cup-handle');
+    const rim = document.getElementById('cup-rim');
+    const liquid = document.getElementById('cup-liquid');
+    const steamGroup = document.getElementById('steam');
+    if (!outline || !handle || !rim || !liquid || !steamGroup) return;
+
+    if (reduced) { steamGroup.style.opacity = '1'; return; }
+
+    function prepDraw(el, delayMs, durationMs){
+      const len = (el.getTotalLength ? el.getTotalLength() : 120) + 2;
+      el.style.strokeDasharray = String(len);
+      el.style.strokeDashoffset = String(len);
+      el.style.transition = 'stroke-dashoffset ' + durationMs + 'ms cubic-bezier(.65,0,.35,1) ' + delayMs + 'ms';
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.style.strokeDashoffset = '0'; }));
+    }
+    prepDraw(rim, 0, 450);
+    prepDraw(outline, 280, 950);
+    prepDraw(handle, 950, 450);
+
+    liquid.style.opacity = '0';
+    liquid.style.transformBox = 'fill-box';
+    liquid.style.transformOrigin = 'bottom';
+    liquid.style.transform = 'scaleY(0)';
+    liquid.style.transition = 'transform 650ms cubic-bezier(.34,1.1,.64,1) 1350ms, opacity 350ms ease 1350ms';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      liquid.style.transform = 'scaleY(1)';
+      liquid.style.opacity = '0.55';
+    }));
+
+    steamGroup.style.opacity = '0';
+    steamGroup.style.transition = 'opacity 500ms ease 1950ms';
+    requestAnimationFrame(() => requestAnimationFrame(() => { steamGroup.style.opacity = '1'; }));
+  })();
+
+  // Typewriter for the hero kicker line.
+  (function typeKicker(){
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const kicker = document.querySelector('.hero-kicker');
+    if (!kicker || reduced) return;
+    const text = kicker.textContent;
+    kicker.textContent = '';
+    kicker.style.borderRight = '1px solid var(--ink-soft)';
+    let i = 0;
+    function step(){
+      kicker.textContent = text.slice(0, i);
+      i++;
+      if (i <= text.length) { setTimeout(step, 26); }
+      else { setTimeout(() => { kicker.style.borderRight = 'none'; }, 400); }
+    }
+    step();
+  })();
 </script>
 </body>
 </html>
