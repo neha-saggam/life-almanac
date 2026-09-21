@@ -992,18 +992,26 @@
       filtered.forEach((cmd, i) => {
         const row = document.createElement('div');
         row.className = 'cmdk-item' + (i === activeIndex ? ' active' : '');
+        row.dataset.index = String(i);
         row.innerHTML = '<span>' + cmd.label + '</span><span class="hint">' + cmd.hint + '</span>';
         row.addEventListener('mouseenter', () => { activeIndex = i; render(); });
-        row.addEventListener('click', () => runActive());
         list.appendChild(row);
       });
     }
 
-    function runActive(){
-      const cmd = filtered[activeIndex];
+    function runActive(index){
+      const cmd = filtered[typeof index === 'number' ? index : activeIndex];
       if (cmd) cmd.action();
       close();
     }
+
+    // Delegated click on the list itself, rather than per-row listeners:
+    // more robust against the row being re-rendered between hover and click.
+    list.addEventListener('click', (e) => {
+      const row = e.target.closest('.cmdk-item');
+      if (!row) return;
+      runActive(parseInt(row.dataset.index, 10));
+    });
 
     function open(){
       overlay.classList.add('open');
