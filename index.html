@@ -324,6 +324,47 @@
   .stop-label.essay-label{ color:var(--violet) !important; border-color:var(--violet) !important; font-weight:600; }
   .stop-label::before{ display:none !important; }
   .work-history{ margin-top:8px; }
+  /* Command palette */
+  .cmdk-overlay{
+    position:fixed; inset:0; background:rgba(38,34,27,0.45); z-index:100;
+    display:flex; align-items:flex-start; justify-content:center; padding-top:12vh;
+    opacity:0; pointer-events:none; transition:opacity .18s ease;
+  }
+  .cmdk-overlay.open{ opacity:1; pointer-events:auto; }
+  .cmdk-box{
+    width:min(560px, 90vw); background:var(--paper-raised); border:1px solid var(--line);
+    box-shadow:0 20px 50px rgba(38,34,27,0.3); transform:translateY(-10px); transition:transform .18s ease;
+  }
+  .cmdk-overlay.open .cmdk-box{ transform:translateY(0); }
+  .cmdk-input{
+    width:100%; box-sizing:border-box; border:none; border-bottom:1px solid var(--line);
+    background:transparent; color:var(--ink); font-family:'IBM Plex Mono', monospace; font-size:15px;
+    padding:16px 18px; outline:none;
+  }
+  .cmdk-input::placeholder{ color:var(--ink-soft); }
+  .cmdk-list{ max-height:320px; overflow-y:auto; padding:6px; }
+  .cmdk-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:14px; cursor:pointer;
+  }
+  .cmdk-item .hint{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); }
+  .cmdk-item.active{ background:var(--paper); }
+  .cmdk-hint-row{ padding:8px 14px; border-top:1px solid var(--line); font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); display:flex; gap:14px; }
+  .cmdk-trigger{
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-soft);
+    border:1px solid var(--line); padding:4px 9px; margin-left:10px; background:var(--paper-raised);
+  }
+  @media (max-width:720px){ .cmdk-trigger{ display:none; } }
+
+  .site-footer{
+    margin-top:20px; padding-top:16px; border-top:1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);
+    display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center;
+  }
+  .site-footer a{ color:var(--ink-soft); }
+  .site-footer a:hover{ color:var(--violet); }
+
   .full-note{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-soft); max-width:60ch; font-family:'IBM Plex Mono', monospace; }
 </style>
 </head>
@@ -400,6 +441,15 @@
     <button class="tab-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
       <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
     </button>
+    <span class="cmdk-trigger" id="cmdk-trigger" title="Command palette">⌘K</span>
+  </div>
+
+  <div class="cmdk-overlay" id="cmdk-overlay">
+    <div class="cmdk-box">
+      <input class="cmdk-input" id="cmdk-input" type="text" placeholder="Jump to a section, or a link…" autocomplete="off">
+      <div class="cmdk-list" id="cmdk-list"></div>
+      <div class="cmdk-hint-row"><span>↑↓ navigate</span><span>↵ open</span><span>esc close</span></div>
+    </div>
   </div>
 
   <!-- CAREER -->
@@ -574,6 +624,15 @@
 
   <div class="full-note">// built from what's come up across our conversations — updates as more does.</div>
 
+  <div class="site-footer">
+    <span id="footer-clock">Pune, India</span>
+    <a href="https://www.linkedin.com/in/nehasaggam/" target="_blank" rel="noopener">./linkedin</a>
+    <a href="https://medium.com/@nehasaggam" target="_blank" rel="noopener">./medium</a>
+    <a href="https://hevy.com/profile/nehasaggam" target="_blank" rel="noopener">./hevy</a>
+    <a href="https://github.com/neha-saggam" target="_blank" rel="noopener">./github</a>
+    <span class="cmdk-trigger" id="cmdk-trigger-2" title="Command palette" style="margin-left:auto;">⌘K to jump anywhere</span>
+  </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -650,6 +709,8 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     const current = document.querySelector('.chapter.active');
     const currentIndex = current ? allChapterIds.indexOf(current.id) : 0;
     const delta = e.key === 'ArrowRight' ? 1 : -1;
@@ -872,6 +933,94 @@
     requestAnimationFrame(() => requestAnimationFrame(() => { steamGroup.style.opacity = '1'; }));
 
     if (caption) setTimeout(() => caption.classList.add('shown'), 2050);
+  })();
+
+  // Live clock in the footer, showing Pune (IST) time regardless of the visitor's own timezone.
+  (function footerClock(){
+    const el = document.getElementById('footer-clock');
+    if (!el) return;
+    function tick(){
+      const now = new Date();
+      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const hh = String(ist.getHours()).padStart(2, '0');
+      const mm = String(ist.getMinutes()).padStart(2, '0');
+      el.textContent = 'Pune, India \u00b7 ' + hh + ':' + mm + ' IST';
+    }
+    tick();
+    setInterval(tick, 15000);
+  })();
+
+  // Command palette: jump to a section or a link, keyboard-first.
+  (function commandPalette(){
+    const overlay = document.getElementById('cmdk-overlay');
+    const input = document.getElementById('cmdk-input');
+    const list = document.getElementById('cmdk-list');
+    const triggers = [document.getElementById('cmdk-trigger'), document.getElementById('cmdk-trigger-2')].filter(Boolean);
+    if (!overlay || !input || !list || triggers.length === 0) return;
+
+    const commands = [
+      { label: 'Go to Career', hint: 'section', action: () => activateChapter('career') },
+      { label: 'Go to Ventures', hint: 'section', action: () => activateChapter('ventures') },
+      { label: 'Go to Travel', hint: 'section', action: () => activateChapter('travel') },
+      { label: 'Go to Writing', hint: 'section', action: () => activateChapter('writing') },
+      { label: 'Toggle dark mode', hint: 'action', action: () => { const t = document.getElementById('theme-toggle'); if (t) t.click(); } },
+      { label: 'Shuffle to a random section', hint: 'action', action: () => { const s = document.getElementById('surprise-btn'); if (s) s.click(); } },
+      { label: 'Open LinkedIn', hint: 'link \u2197', action: () => window.open('https://www.linkedin.com/in/nehasaggam/', '_blank') },
+      { label: 'Open Medium', hint: 'link \u2197', action: () => window.open('https://medium.com/@nehasaggam', '_blank') },
+      { label: 'Open Hevy', hint: 'link \u2197', action: () => window.open('https://hevy.com/profile/nehasaggam', '_blank') },
+      { label: 'Open GitHub', hint: 'link \u2197', action: () => window.open('https://github.com/neha-saggam', '_blank') }
+    ];
+
+    let filtered = commands.slice();
+    let activeIndex = 0;
+
+    function render(){
+      list.innerHTML = '';
+      filtered.forEach((cmd, i) => {
+        const row = document.createElement('div');
+        row.className = 'cmdk-item' + (i === activeIndex ? ' active' : '');
+        row.innerHTML = '<span>' + cmd.label + '</span><span class="hint">' + cmd.hint + '</span>';
+        row.addEventListener('mouseenter', () => { activeIndex = i; render(); });
+        row.addEventListener('click', () => runActive());
+        list.appendChild(row);
+      });
+    }
+
+    function runActive(){
+      const cmd = filtered[activeIndex];
+      if (cmd) cmd.action();
+      close();
+    }
+
+    function open(){
+      overlay.classList.add('open');
+      input.value = '';
+      filtered = commands.slice();
+      activeIndex = 0;
+      render();
+      setTimeout(() => input.focus(), 50);
+    }
+    function close(){ overlay.classList.remove('open'); }
+
+    triggers.forEach(t => t.addEventListener('click', open));
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); open(); return; }
+      if (!overlay.classList.contains('open')) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, filtered.length - 1); render(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); render(); }
+      if (e.key === 'Enter') { e.preventDefault(); runActive(); }
+    });
+
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase();
+      filtered = commands.filter(c => c.label.toLowerCase().includes(q));
+      activeIndex = 0;
+      render();
+    });
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   })();
 
   // Typewriter for the hero kicker line.
