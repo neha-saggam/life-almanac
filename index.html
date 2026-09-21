@@ -309,6 +309,29 @@
   .day-rhythm .time{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--ink-soft); display:block; }
   .day-rhythm .what{ font-family:'Fraunces', serif; font-size:13px; }
 
+  .wc{ display:flex; align-items:stretch; gap:10px; margin-bottom:14px; }
+  .wc-arrow{
+    flex-shrink:0; width:38px; border:1px solid var(--line); background:var(--paper-raised);
+    color:var(--ink); font-size:22px; cursor:pointer; font-family:'Fraunces', serif;
+    transition:background .15s ease, color .15s ease;
+  }
+  .wc-arrow:hover{ background:var(--c-writing); color:var(--paper); }
+  .wc-track{ flex:1; min-width:0; position:relative; overflow:hidden; }
+  .wc-slide{
+    display:none; background:var(--paper-raised); border:1px solid var(--line); border-top:3px solid var(--c-writing);
+    padding:20px 22px; animation:wcIn .3s ease;
+  }
+  .wc-slide.active{ display:block; }
+  @keyframes wcIn{ from{ opacity:0; transform:translateX(10px); } to{ opacity:1; transform:none; } }
+  .wc-cat{ font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.03em; color:var(--c-writing); text-transform:uppercase; }
+  .wc-title{ font-family:'Fraunces', serif; font-size:19px; margin:6px 0 8px; }
+  .wc-blurb{ font-size:14px; color:var(--ink-soft); margin:0 0 12px; }
+  .wc-count{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); }
+  .wc-dots{ display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+  .wc-dot{ width:7px; height:7px; border-radius:50%; background:var(--line); cursor:pointer; border:none; padding:0; }
+  .wc-dot.active{ background:var(--c-writing); }
+  @media (prefers-reduced-motion: reduce){ .wc-slide{ animation:none; } }
+
   #travel-map{
     height:320px; width:100%; border:1px solid var(--line); margin-bottom:18px;
     filter:sepia(8%) saturate(85%);
@@ -601,24 +624,12 @@
       <p style="font-family:'Fraunces', serif; font-style:italic; font-size:17px; color:var(--ink);">A developer, a nature lover, and an imaginary traveller.</p>
       
     </div>
-    <div class="grid">
-      <div class="card">
-        <h3>Travel essays</h3>
-        <ul>
-          <li><a href="https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb" target="_blank" rel="noopener">Bhutan</a> — pinned · <a href="#travel" style="font-size:12px; color:var(--violet); text-decoration:none; border-bottom:1px dotted var(--violet);">📍 on the map</a></li>
-          <li><a href="https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b" target="_blank" rel="noopener">Reflecting on My Japan Journey</a> · <a href="#travel" style="font-size:12px; color:var(--violet); text-decoration:none; border-bottom:1px dotted var(--violet);">📍 on the map</a></li>
-          <li><a href="https://medium.com/@nehasaggam/sri-lanka-plan-your-own-travel-4f8141efcc5" target="_blank" rel="noopener">Sri Lanka: Plan Your Own Travel</a></li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Engineering notes</h3>
-        <ul>
-          <li><a href="https://medium.com/@nehasaggam/what-ai-did-to-us-are-we-getting-more-done-or-just-doing-more-c6540d836d3a" target="_blank" rel="noopener">AI: Are We Getting More Done, or Just Doing More?</a></li>
-          <li><a href="https://medium.com/technogise/unit-testing-what-to-mock-and-what-not-to-2b70015bb285" target="_blank" rel="noopener">Unit Testing: What to Mock and What Not To</a></li>
-          <li><a href="https://medium.com/technogise/rest-essentials-9379abebc19f" target="_blank" rel="noopener">REST Essentials</a></li>
-        </ul>
-      </div>
+    <div class="wc" id="writing-carousel">
+      <button class="wc-arrow wc-prev" id="wc-prev" aria-label="Previous essay">‹</button>
+      <div class="wc-track" id="wc-track"></div>
+      <button class="wc-arrow wc-next" id="wc-next" aria-label="Next essay">›</button>
     </div>
+    <div class="wc-dots" id="wc-dots"></div>
     <div class="open-note">Travel essays and engineering notes, side by side — the same split as everywhere else on this page.</div>
   </section>
 
@@ -933,6 +944,60 @@
     requestAnimationFrame(() => requestAnimationFrame(() => { steamGroup.style.opacity = '1'; }));
 
     if (caption) setTimeout(() => caption.classList.add('shown'), 2050);
+  })();
+
+  // Writing carousel: one essay at a time, arrows + dots to move through.
+  (function writingCarousel(){
+    const track = document.getElementById('wc-track');
+    const dotsEl = document.getElementById('wc-dots');
+    const prevBtn = document.getElementById('wc-prev');
+    const nextBtn = document.getElementById('wc-next');
+    if (!track || !dotsEl || !prevBtn || !nextBtn) return;
+
+    const essays = [
+      { cat: 'Travel essay \u00b7 pinned', title: 'Bhutan', blurb: 'A quiet, high-altitude trip written up as a reflection, not just an itinerary.', url: 'https://medium.com/@nehasaggam/bhutan-85cbcbdc69eb' },
+      { cat: 'Travel essay', title: 'Reflecting on My Japan Journey', blurb: 'Temples, order, and what stuck after the trip home.', url: 'https://medium.com/@nehasaggam/reflecting-on-my-japan-journey-8051997dc06b' },
+      { cat: 'Travel essay', title: 'Sri Lanka: Plan Your Own Travel', blurb: 'A practical guide for anyone planning their own coastline trip.', url: 'https://medium.com/@nehasaggam/sri-lanka-plan-your-own-travel-4f8141efcc5' },
+      { cat: 'Engineering note', title: 'AI: Are We Getting More Done, or Just Doing More?', blurb: 'A reflection on whether AI tools actually save time, or just add more motion.', url: 'https://medium.com/@nehasaggam/what-ai-did-to-us-are-we-getting-more-done-or-just-doing-more-c6540d836d3a' },
+      { cat: 'Engineering note', title: 'Unit Testing: What to Mock and What Not To', blurb: 'A practical take on where mocking helps, and where it just hides bugs.', url: 'https://medium.com/technogise/unit-testing-what-to-mock-and-what-not-to-2b70015bb285' },
+      { cat: 'Engineering note', title: 'REST Essentials', blurb: 'The fundamentals that keep getting skipped in the rush to ship an API.', url: 'https://medium.com/technogise/rest-essentials-9379abebc19f' }
+    ];
+
+    let current = 0;
+
+    function renderSlides(){
+      track.innerHTML = '';
+      essays.forEach((e, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'wc-slide' + (i === current ? ' active' : '');
+        slide.innerHTML =
+          '<div class="wc-cat">' + e.cat + '</div>' +
+          '<div class="wc-title">' + e.title + '</div>' +
+          '<p class="wc-blurb">' + e.blurb + '</p>' +
+          '<a href="' + e.url + '" target="_blank" rel="noopener" style="color:var(--violet); text-decoration:none; border-bottom:1px dotted var(--violet); font-size:13px;">Read on Medium \u2197</a>' +
+          '<div class="wc-count" style="margin-top:10px;">' + (i + 1) + ' / ' + essays.length + '</div>';
+        track.appendChild(slide);
+      });
+    }
+    function renderDots(){
+      dotsEl.innerHTML = '';
+      essays.forEach((e, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'wc-dot' + (i === current ? ' active' : '');
+        dot.setAttribute('aria-label', 'Go to essay ' + (i + 1));
+        dot.addEventListener('click', () => { current = i; update(); });
+        dotsEl.appendChild(dot);
+      });
+    }
+    function update(){
+      track.querySelectorAll('.wc-slide').forEach((s, i) => s.classList.toggle('active', i === current));
+      dotsEl.querySelectorAll('.wc-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    }
+    renderSlides();
+    renderDots();
+
+    prevBtn.addEventListener('click', () => { current = (current - 1 + essays.length) % essays.length; update(); });
+    nextBtn.addEventListener('click', () => { current = (current + 1) % essays.length; update(); });
   })();
 
   // Live clock in the footer, showing Pune (IST) time regardless of the visitor's own timezone.
