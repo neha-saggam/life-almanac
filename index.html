@@ -987,23 +987,43 @@
     let filtered = commands.slice();
     let activeIndex = 0;
 
-    function render(){
+    // Rebuilds the row elements. Called only when the underlying filtered
+    // list actually changes (on open, and while typing) -- never on hover,
+    // so a row is never torn down and recreated out from under a click.
+    function renderList(){
       list.innerHTML = '';
       filtered.forEach((cmd, i) => {
         const row = document.createElement('div');
         row.className = 'cmdk-item' + (i === activeIndex ? ' active' : '');
         row.dataset.index = String(i);
         row.innerHTML = '<span>' + cmd.label + '</span><span class="hint">' + cmd.hint + '</span>';
-        row.addEventListener('mouseenter', () => { activeIndex = i; render(); });
         list.appendChild(row);
       });
     }
+
+    // Just moves the '.active' highlight across the existing rows -- no
+    // DOM rebuild, so hovering never interferes with an in-flight click.
+    function updateActiveHighlight(){
+      list.querySelectorAll('.cmdk-item').forEach((row, i) => {
+        row.classList.toggle('active', i === activeIndex);
+      });
+    }
+
+    // Kept as an alias so the rest of the code (open/typing) doesn't need to change.
+    function render(){ renderList(); }
 
     function runActive(index){
       const cmd = filtered[typeof index === 'number' ? index : activeIndex];
       if (cmd) cmd.action();
       close();
     }
+
+    list.addEventListener('mouseover', (e) => {
+      const row = e.target.closest('.cmdk-item');
+      if (!row) return;
+      const idx = parseInt(row.dataset.index, 10);
+      if (idx !== activeIndex) { activeIndex = idx; updateActiveHighlight(); }
+    });
 
     // Delegated click on the list itself, rather than per-row listeners:
     // more robust against the row being re-rendered between hover and click.
