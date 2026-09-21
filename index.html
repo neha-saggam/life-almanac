@@ -958,6 +958,19 @@
     const triggers = [document.getElementById('cmdk-trigger'), document.getElementById('cmdk-trigger-2')].filter(Boolean);
     if (!overlay || !input || !list || triggers.length === 0) return;
 
+    // Opening links via a real, temporary anchor click is far more reliable across
+    // browsers than window.open() -- some popup blockers silently swallow window.open
+    // when it's triggered from a keypress rather than a direct mouse click.
+    function openLink(url){
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     const commands = [
       { label: 'Go to Career', hint: 'section', action: () => activateChapter('career') },
       { label: 'Go to Ventures', hint: 'section', action: () => activateChapter('ventures') },
@@ -965,10 +978,10 @@
       { label: 'Go to Writing', hint: 'section', action: () => activateChapter('writing') },
       { label: 'Toggle dark mode', hint: 'action', action: () => { const t = document.getElementById('theme-toggle'); if (t) t.click(); } },
       { label: 'Shuffle to a random section', hint: 'action', action: () => { const s = document.getElementById('surprise-btn'); if (s) s.click(); } },
-      { label: 'Open LinkedIn', hint: 'link \u2197', action: () => window.open('https://www.linkedin.com/in/nehasaggam/', '_blank') },
-      { label: 'Open Medium', hint: 'link \u2197', action: () => window.open('https://medium.com/@nehasaggam', '_blank') },
-      { label: 'Open Hevy', hint: 'link \u2197', action: () => window.open('https://hevy.com/profile/nehasaggam', '_blank') },
-      { label: 'Open GitHub', hint: 'link \u2197', action: () => window.open('https://github.com/neha-saggam', '_blank') }
+      { label: 'Open LinkedIn', hint: 'link \u2197', action: () => openLink('https://www.linkedin.com/in/nehasaggam/') },
+      { label: 'Open Medium', hint: 'link \u2197', action: () => openLink('https://medium.com/@nehasaggam') },
+      { label: 'Open Hevy', hint: 'link \u2197', action: () => openLink('https://hevy.com/profile/nehasaggam') },
+      { label: 'Open GitHub', hint: 'link \u2197', action: () => openLink('https://github.com/neha-saggam') }
     ];
 
     let filtered = commands.slice();
